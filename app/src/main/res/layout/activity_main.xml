@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.vikrach.simplespeedometer.MainActivity"
+    android:background="@drawable/road_background">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/speed_limit_sign"
+        android:layout_marginTop="13dp"
+        android:id="@+id/speedLimitSign"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:text="Your Speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/yourSpeedText"
+        android:textSize="24sp"
+        android:layout_marginTop="32dp"
+        android:textStyle="normal|bold"
+        android:layout_below="@+id/speedLimitSign"
+        android:layout_centerHorizontal="true"
+        android:textColor="@android:color/background_light" />
+
+    <TextView
+        android:text="---"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/yourSpeed"
+        android:textColor="@android:color/background_light"
+        android:layout_marginTop="13dp"
+        android:textStyle="normal|bold"
+        android:textSize="30sp"
+        android:layout_below="@+id/yourSpeedText"
+        android:layout_alignStart="@+id/yourSpeedText" />
+
+    <TextView
+        android:text="mph"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mphkmh"
+        android:textColor="@android:color/background_light"
+        android:textSize="30sp"
+        android:textStyle="normal|bold"
+        android:layout_marginEnd="22dp"
+        android:layout_alignBaseline="@+id/yourSpeed"
+        android:layout_alignBottom="@+id/yourSpeed"
+        android:layout_alignEnd="@+id/speedLimitSign" />
+
+    <TextView
+        android:text="MPH"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:textSize="35sp"
+        android:textStyle="normal|bold"
+        android:id="@+id/mphkmh2"
+        android:layout_alignBaseline="@+id/speedLimitText"
+        android:layout_alignBottom="@+id/speedLimitText"
+        android:layout_alignEnd="@+id/mphkmh" />
+
+    <TextView
+        android:text="35"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="47dp"
+        android:id="@+id/speedLimitText"
+        android:textSize="50sp"
+        android:textStyle="normal|bold"
+        android:textColorLink="?android:attr/colorForeground"
+        android:textColor="@android:color/black"
+        android:layout_above="@+id/yourSpeedText"
+        android:layout_toStartOf="@+id/mphkmh2"
+        android:layout_marginEnd="19dp" />
+
+
+</RelativeLayout>
