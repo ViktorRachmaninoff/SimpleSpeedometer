@@ -224,24 +224,48 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 
-            if (nCurrentSpeed > mphLimit)
-            {
-                currenttime = System.currentTimeMillis();
-                if(vibe)
-                v.vibrate(500);
-                try {
-                    if (ring&&(currenttime-starttime>5000)) {
+            if(kmh) {
+                if (nCurrentSpeed > kmhLimit)
+                {
+                    currenttime = System.currentTimeMillis();
+                    if(vibe)
+                 v.vibrate(500);
+                 try {
+                      if (ring&&(currenttime-starttime>5000)) {
                         r.play();
                         starttime = System.currentTimeMillis();
-                    }
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            } else {
+                       }
+                 }
+                 catch (Exception e)
+                   {
+                        e.printStackTrace();
+                   }
+              } else {
                 if (r.isPlaying()) {
                     r.stop();
+                }
+            }
+            }
+            else {
+                if (nCurrentSpeed > kmhLimit)
+                {
+                    currenttime = System.currentTimeMillis();
+                    if(vibe)
+                        v.vibrate(500);
+                    try {
+                        if (ring&&(currenttime-starttime>5000)) {
+                            r.play();
+                            starttime = System.currentTimeMillis();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                } else {
+                    if (r.isPlaying()) {
+                        r.stop();
+                    }
                 }
             }
         }
