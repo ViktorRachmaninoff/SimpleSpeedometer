@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
             }
             else {
-                if (nCurrentSpeed > kmhLimit)
+                if (nCurrentSpeed > mphLimit)
                 {
                     currenttime = System.currentTimeMillis();
                     if(vibe)
