@@ -24,6 +24,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     TextView speedLimit;
     TextView lastUpdated;
 
+    ImageButton speedLimitSign;
+
     boolean kmh;
     boolean vibe;
     boolean ring;
@@ -79,31 +83,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       /* if (ContextCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
 
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        10);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }*/
         kmhLimit = (int) Math.round(mphLimit * 1.60934);
 
         speed = (TextView) findViewById(R.id.yourSpeed);
@@ -115,8 +95,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         starttime = System.currentTimeMillis();
         starttime = System.currentTimeMillis();
 
+        speedLimitSign = (ImageButton) findViewById(R.id.speedLimitSign);
 
-        if (Build.VERSION.SDK_INT < 23) {
+        speedLimitSign.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                startActivity(new Intent(MainActivity.this, MapsActivity.class));
+
+
+                return false;
+            }
+        });
+
+
+        if (Build.VERSION.SDK_INT < 22) {
             //Do not need to check the permission
         } else {
             if (checkAndRequestPermissions()) {
@@ -141,12 +134,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             mphKmh2.setText("mph");
         }
 
-  //     if(permissionsOK) {
-            LocationManager locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            this.onLocationChanged(null);
-    //    }
+
     }
+
+
+
 
     @Override
     public void onLocationChanged(Location location) {
@@ -170,72 +162,67 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         url = url + lon + "," + lat + "," + lon2 + "," + lat2 + "]" + "[maxspeed=*]";
 
 
-
         currenttime = System.currentTimeMillis();
-        if(currenttime-starttime2>5000)
-        {
-            Date d=new Date();
-            SimpleDateFormat sdf=new SimpleDateFormat("hh:mm:ss a");
+        if (currenttime - starttime2 > 5000) {
+            Date d = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");
             String currentDateTimeString = sdf.format(d);
             lastUpdated.setText(currentDateTimeString);
 
-        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+            dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 
-        DownloadManager.Request request = new DownloadManager.Request(
-                Uri.parse(url));
-        dm.enqueue(request);
+            DownloadManager.Request request = new DownloadManager.Request(
+                    Uri.parse(url));
+            dm.enqueue(request);
 
 
             class MyDownloadReceiver extends BroadcastReceiver {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                Uri uri = dm.getUriForDownloadedFile(id);
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                    Uri uri = dm.getUriForDownloadedFile(id);
 
 
-                String raw = URItoRaw(uri);
-                String maxspeed = "?";
+                    String raw = URItoRaw(uri);
+                    String maxspeed = "?";
 
-                try {
-                    maxspeed = parseXML(raw);
-                } catch (Exception ex) {
-                    Toast.makeText(context, "ERROR", Toast.LENGTH_LONG).show();
+                    try {
+                        maxspeed = parseXML(raw);
+                    } catch (Exception ex) {
+                        Toast.makeText(context, "ERROR", Toast.LENGTH_LONG).show();
+                    }
+
+
+                    if (!maxspeed.equals("?")) {
+                        maxspeed = maxspeed.substring(0, (maxspeed.length() - 4));
+                        mphLimit = Integer.valueOf(maxspeed);
+                    }
+
+
+                    File f = new File(uri.getPath());
+                    boolean deleted;
+
+                    if (f.exists())
+                        deleted = f.delete();
+
+
+                    starttime2 = System.currentTimeMillis();
+                    if (kmh) {
+                        kmhLimit = (int) Math.round(mphLimit * 1.60934);
+                        speedLimit.setText(String.valueOf(kmhLimit));
+                        mphKmh.setText("km/h");
+                        mphKmh2.setText("km/h");
+                    } else {
+                        speedLimit.setText(String.valueOf(mphLimit));
+                        mphKmh.setText("mph");
+                        mphKmh2.setText("mph");
+                    }
+
                 }
-
-
-                if (!maxspeed.equals("?")) {
-                    maxspeed = maxspeed.substring(0, (maxspeed.length() - 4));
-                    mphLimit = Integer.valueOf(maxspeed);
-                }
-
-
-                File f = new File(uri.getPath());
-                boolean deleted;
-
-                if(f.exists())
-                deleted = f.delete();
-
-
-                starttime2 = System.currentTimeMillis();
-                if (kmh) {
-                    kmhLimit = (int) Math.round(mphLimit * 1.60934);
-                    speedLimit.setText(String.valueOf(kmhLimit));
-                    mphKmh.setText("km/h");
-                    mphKmh2.setText("km/h");
-                } else {
-                    speedLimit.setText(String.valueOf(mphLimit));
-                    mphKmh.setText("mph");
-                    mphKmh2.setText("mph");
-                }
-
             }
-        }
             registerReceiver(new MyDownloadReceiver(), new IntentFilter(
                     DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-    }
-
-
-
+        }
 
 
         Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
@@ -244,14 +231,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         if (location == null) {
             speed.setText("---");
-        }
-        else
-        {
-            if(kmh) {
+        } else {
+            if (kmh) {
                 nCurrentSpeed = Math.round(location.getSpeed() * 3.6f);
                 speed.setText(String.valueOf(nCurrentSpeed));
-            }
-            else {
+            } else {
                 nCurrentSpeed = Math.round(location.getSpeed() * 2.23694f);
                 speed.setText(String.valueOf(nCurrentSpeed));
             }
@@ -259,42 +243,35 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 
-            if(kmh) {
-                if (nCurrentSpeed > kmhLimit+alertSpeed)
-                {
+            if (kmh) {
+                if (nCurrentSpeed > kmhLimit + alertSpeed) {
                     currenttime = System.currentTimeMillis();
-                    if(vibe)
-                 v.vibrate(500);
-                 try {
-                      if (ring&&(currenttime-starttime>5000)) {
-                        r.play();
-                        starttime = System.currentTimeMillis();
-                       }
-                 }
-                 catch (Exception e)
-                   {
-                        e.printStackTrace();
-                   }
-              } else {
-                if (r.isPlaying()) {
-                    r.stop();
-                }
-            }
-            }
-            else {
-                if (nCurrentSpeed > mphLimit+alertSpeed)
-                {
-                    currenttime = System.currentTimeMillis();
-                    if(vibe)
+                    if (vibe)
                         v.vibrate(500);
                     try {
-                        if (ring&&(currenttime-starttime>5000)) {
+                        if (ring && (currenttime - starttime > 5000)) {
                             r.play();
                             starttime = System.currentTimeMillis();
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    catch (Exception e)
-                    {
+                } else {
+                    if (r.isPlaying()) {
+                        r.stop();
+                    }
+                }
+            } else {
+                if (nCurrentSpeed > mphLimit + alertSpeed) {
+                    currenttime = System.currentTimeMillis();
+                    if (vibe)
+                        v.vibrate(500);
+                    try {
+                        if (ring && (currenttime - starttime > 5000)) {
+                            r.play();
+                            starttime = System.currentTimeMillis();
+                        }
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 } else {
@@ -308,8 +285,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-    public String parseXML(String raw) throws Exception
-    {
+    public String parseXML(String raw) throws Exception {
         String max = "?";
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
@@ -318,13 +294,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         NodeList tags = doc.getElementsByTagName("tag");
 
 
-        for(int i = 0; i < tags.getLength(); i++)
-        {
+        for (int i = 0; i < tags.getLength(); i++) {
             final Element element = (Element) tags.item(i);
 
 
-            if(element.getAttribute("k").equals("maxspeed"))
-            {
+            if (element.getAttribute("k").equals("maxspeed")) {
                 final String maxspeed = "" + element.getAttribute("v");
                 max = maxspeed;
             }
@@ -430,7 +404,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 Manifest.permission.READ_EXTERNAL_STORAGE);
 
 
-
         List<String> listPermissionsNeeded = new ArrayList<>();
         if (storagePermission != PackageManager.PERMISSION_GRANTED) {
             listPermissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -454,7 +427,22 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     //Permission Granted Successfully.
-                    permissionsOK = true;
+                    LocationManager locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
+                    locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+                        this.onLocationChanged(null);
+
+
+
                 } else {
                     //You did not accept the request can not use the functionality.
                     permissionsOK = false;
@@ -462,5 +450,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 break;
         }
     }
+
+
+    public void policeSpotted() {
+
+        speedLimitSign.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                startActivity(new Intent(MainActivity.this, MapsActivity.class));
+
+
+                return false;
+            }
+        });
+
+
+    }
+
+
+
 
 }
