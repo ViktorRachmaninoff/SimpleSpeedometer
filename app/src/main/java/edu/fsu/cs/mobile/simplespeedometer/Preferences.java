@@ -1,12 +1,10 @@
-package com.example.vikrach.simplespeedometer;
+package edu.fsu.cs.mobile.simplespeedometer;
 
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
 
-/**
- * Created by vikrach on 4/3/17.
- */
+
 
 public class Preferences extends PreferenceActivity  {
 

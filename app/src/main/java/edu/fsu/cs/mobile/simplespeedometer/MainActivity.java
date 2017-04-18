@@ -1,4 +1,4 @@
-package com.example.vikrach.simplespeedometer;
+package edu.fsu.cs.mobile.simplespeedometer;
 
 import android.Manifest;
 import android.app.DownloadManager;
@@ -27,6 +27,11 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.core.TwitterSession;
+import com.twitter.sdk.android.tweetcomposer.TweetComposer;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -42,12 +47,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import static com.example.vikrach.simplespeedometer.R.id.mphkmh;
-import static com.example.vikrach.simplespeedometer.R.id.mphkmh2;
+import io.fabric.sdk.android.Fabric;
+
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
@@ -68,9 +74,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     int mphLimit;
     int kmhLimit;
 
+    String globalstreet = "unknown";
+
+    int speeding = 0;
+
     long starttime;
     long currenttime;
     long starttime2;
+    long starttime3;
+
 
     private static final int MY_PERMISSIONS_REQUEST_ACCOUNTS = 1;
 
@@ -107,13 +119,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         kmhLimit = (int) Math.round(mphLimit * 1.60934);
 
         speed = (TextView) findViewById(R.id.yourSpeed);
-        mphKmh = (TextView) findViewById(mphkmh);
-        mphKmh2 = (TextView) findViewById(mphkmh2);
+        mphKmh = (TextView) findViewById(R.id.mphkmh);
+        mphKmh2 = (TextView) findViewById(R.id.mphkmh2);
         speedLimit = (TextView) findViewById(R.id.speedLimitText);
         lastUpdated = (TextView) findViewById(R.id.lastUpdatedTime);
 
         starttime = System.currentTimeMillis();
-        starttime = System.currentTimeMillis();
+        starttime2 = System.currentTimeMillis();
+        starttime3 = System.currentTimeMillis();
 
 
         if (Build.VERSION.SDK_INT < 23) {
@@ -141,11 +154,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             mphKmh2.setText("mph");
         }
 
-  //     if(permissionsOK) {
-            LocationManager locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            this.onLocationChanged(null);
-    //    }
+        //     if(permissionsOK) {
+        LocationManager locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        this.onLocationChanged(null);
+        //    }
     }
 
     @Override
@@ -179,60 +192,64 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             String currentDateTimeString = sdf.format(d);
             lastUpdated.setText(currentDateTimeString);
 
-        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+            dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 
-        DownloadManager.Request request = new DownloadManager.Request(
-                Uri.parse(url));
-        dm.enqueue(request);
+            DownloadManager.Request request = new DownloadManager.Request(
+                    Uri.parse(url));
+            dm.enqueue(request);
 
 
             class MyDownloadReceiver extends BroadcastReceiver {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                Uri uri = dm.getUriForDownloadedFile(id);
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                    Uri uri = dm.getUriForDownloadedFile(id);
 
 
-                String raw = URItoRaw(uri);
-                String maxspeed = "?";
+                    String raw = URItoRaw(uri);
+                    String maxspeed = "?";
 
-                try {
-                    maxspeed = parseXML(raw);
-                } catch (Exception ex) {
-                    Toast.makeText(context, "ERROR", Toast.LENGTH_LONG).show();
+                    try {
+                        maxspeed = parseXML(raw);
+                        globalstreet = parseXML2(raw);
+                        CharSequence ch = "street is "+globalstreet.toString();
+                        Toast.makeText(getApplicationContext(), ch, Toast.LENGTH_LONG);
+
+                    } catch (Exception ex) {
+                        Toast.makeText(context, "ERROR", Toast.LENGTH_LONG).show();
+                    }
+
+
+                    if (!maxspeed.equals("?")) {
+                        maxspeed = maxspeed.substring(0, (maxspeed.length() - 4));
+                        mphLimit = Integer.valueOf(maxspeed);
+                    }
+
+
+                    File f = new File(uri.getPath());
+                    boolean deleted;
+
+                    if(f.exists())
+                        deleted = f.delete();
+
+
+                    starttime2 = System.currentTimeMillis();
+                    if (kmh) {
+                        kmhLimit = (int) Math.round(mphLimit * 1.60934);
+                        speedLimit.setText(String.valueOf(kmhLimit));
+                        mphKmh.setText("km/h");
+                        mphKmh2.setText("km/h");
+                    } else {
+                        speedLimit.setText(String.valueOf(mphLimit));
+                        mphKmh.setText("mph");
+                        mphKmh2.setText("mph");
+                    }
+
                 }
-
-
-                if (!maxspeed.equals("?")) {
-                    maxspeed = maxspeed.substring(0, (maxspeed.length() - 4));
-                    mphLimit = Integer.valueOf(maxspeed);
-                }
-
-
-                File f = new File(uri.getPath());
-                boolean deleted;
-
-                if(f.exists())
-                deleted = f.delete();
-
-
-                starttime2 = System.currentTimeMillis();
-                if (kmh) {
-                    kmhLimit = (int) Math.round(mphLimit * 1.60934);
-                    speedLimit.setText(String.valueOf(kmhLimit));
-                    mphKmh.setText("km/h");
-                    mphKmh2.setText("km/h");
-                } else {
-                    speedLimit.setText(String.valueOf(mphLimit));
-                    mphKmh.setText("mph");
-                    mphKmh2.setText("mph");
-                }
-
             }
-        }
             registerReceiver(new MyDownloadReceiver(), new IntentFilter(
                     DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-    }
+        }
 
 
 
@@ -264,28 +281,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 {
                     currenttime = System.currentTimeMillis();
                     if(vibe)
-                 v.vibrate(500);
-                 try {
-                      if (ring&&(currenttime-starttime>5000)) {
-                        r.play();
-                        starttime = System.currentTimeMillis();
-                       }
-                 }
-                 catch (Exception e)
-                   {
-                        e.printStackTrace();
-                   }
-              } else {
-                if (r.isPlaying()) {
-                    r.stop();
-                }
-            }
-            }
-            else {
-                if (nCurrentSpeed > mphLimit+alertSpeed)
-                {
-                    currenttime = System.currentTimeMillis();
-                    if(vibe)
                         v.vibrate(500);
                     try {
                         if (ring&&(currenttime-starttime>5000)) {
@@ -303,14 +298,79 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     }
                 }
             }
+            else
+            {
+                if (nCurrentSpeed > mphLimit+alertSpeed)
+                {
+                    currenttime = System.currentTimeMillis();
+                    if(vibe)
+                        v.vibrate(500);
+                    try {
+                        if (ring&&(currenttime-starttime>5000)) {
+                            r.play();
+                            starttime = System.currentTimeMillis();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                else
+                {
+                    if (r.isPlaying())
+                    {
+                        r.stop();
+                    }
+                }
+
+                currenttime = System.currentTimeMillis();
+                if(currenttime-starttime3>5000)
+                {
+                    starttime3=currenttime;
+                    if(nCurrentSpeed>mphLimit+alertSpeed&&mphLimit>1)
+                    {
+                        speeding++;
+                    }
+                }
+                if(speeding>5)
+                {
+                    speeding=0;
+                    TweetOut(nCurrentSpeed,mphLimit);
+                }
+
+
+
+            }
         }
 
 
     }
 
+    public void TweetOut(int currentspeed, int mphLimit)
+    {
+        TwitterAuthConfig authConfig =  new TwitterAuthConfig("CztcQmjY03aNKGukLg7cYzXAR", "3cBcKEcfE3eBrQN81pTM2gytqUUVouanCaIwGqbSV9drmEqVnD");
+
+        int over = currentspeed-mphLimit;
+
+        String str = "I was going "+Integer.toString(over)+" miles over the speed limit on "+globalstreet+"! #SpeedingShame";
+
+        Fabric.with(this, new TwitterCore(authConfig), new TweetComposer());
+
+        TwitterSession twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
+
+
+        TweetComposer.Builder builder = new TweetComposer.Builder(this)
+                .text(str);
+
+        builder.show();
+    }
+
+
     public String parseXML(String raw) throws Exception
     {
         String max = "?";
+        String street = "?";
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
         Document doc = builder.parse(new InputSource(new StringReader(raw)));
@@ -332,6 +392,32 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
         return max;
+    }
+
+    public String parseXML2(String raw) throws Exception
+    {
+        String street = "?";
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+
+        Document doc = builder.parse(new InputSource(new StringReader(raw)));
+
+        NodeList tags = doc.getElementsByTagName("tag");
+
+
+        for(int i = 0; i < tags.getLength(); i++)
+        {
+            final Element element2 = (Element) tags.item(i);
+
+
+            if(element2.getAttribute("k").equals("name"))
+            {
+                final String streetname = "" + element2.getAttribute("v");
+                street = streetname;
+            }
+
+        }
+
+        return street;
     }
 
 

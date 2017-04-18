@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <CheckBoxPreference
+
         android:defaultValue="false"
         android:title="Kmh"
-        android:key="check_box"
+        android:key="khmcheck"
         android:summary="display as KM/h"/>
     <SwitchPreference
         android:defaultValue="true"
         android:title="Vibrate"
-        android:key="vibrate" />
+        android:key="vibecheck" />
     <SwitchPreference
         android:defaultValue="true"
         android:title="Ring"
-        android:key="ring" />
+        android:key="ringcheck" />
+    <RingtonePreference
+        android:defaultValue=""
+        android:title="Ringtone preference"
+        android:key="ringtone_preference_1" />
     <ListPreference
         android:defaultValue="1"
-        android:title="Set Alert Speed"
+        android:title="List preference"
         android:entries="@array/speeds"
         android:entryValues="@array/speeds"
-        android:key="set_speed_preference" />
-    />
+        android:key="list_preference_1" />
 </PreferenceScreen>

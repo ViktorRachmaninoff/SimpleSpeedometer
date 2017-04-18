@@ -1,4 +1,4 @@
-package com.example.vikrach.simplespeedometer;
+package edu.fsu.cs.mobile.simplespeedometer;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,9 +13,9 @@ public class SplashScreen extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       setContentView(R.layout.activity_splash_screen);
+        setContentView(R.layout.activity_splash_screen);
 
-       // this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Thread myThread = new Thread() {
             @Override
             public void run() {
