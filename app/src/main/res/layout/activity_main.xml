@@ -100,6 +100,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/lastUpdatedTime"
+        android:textColor="?attr/colorButtonNormal"
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@+id/lastUpdatedText"
         android:textSize="12sp" />

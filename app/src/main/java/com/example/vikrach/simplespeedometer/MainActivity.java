@@ -134,8 +134,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             mphKmh2.setText("mph");
         }
 
+        LocationManager locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        this.onLocationChanged(null);
 
     }
+
 
 
 
@@ -163,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
 
         currenttime = System.currentTimeMillis();
-        if (currenttime - starttime2 > 5000) {
+        if (currenttime - starttime2 > 30000) {
             Date d = new Date();
             SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");
             String currentDateTimeString = sdf.format(d);
