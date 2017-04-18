@@ -14,9 +14,12 @@ import android.location.LocationManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,6 +38,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,10 +57,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     TextView mphKmh;
     TextView mphKmh2;
     TextView speedLimit;
+    TextView lastUpdated;
 
     boolean kmh;
     boolean vibe;
     boolean ring;
+    int alertSpeed;
+    boolean permissionsOK = false;
 
     int mphLimit;
     int kmhLimit;
@@ -61,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     long starttime;
     long currenttime;
     long starttime2;
+
+    private static final int MY_PERMISSIONS_REQUEST_ACCOUNTS = 1;
 
 
     @Override
@@ -74,29 +86,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mphKmh = (TextView) findViewById(mphkmh);
         mphKmh2 = (TextView) findViewById(mphkmh2);
         speedLimit = (TextView) findViewById(R.id.speedLimitText);
+        lastUpdated = (TextView) findViewById(R.id.lastUpdatedTime);
 
         starttime = System.currentTimeMillis();
         starttime = System.currentTimeMillis();
 
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
 
-
-            // Should we show an explanation?
-            if (shouldShowRequestPermissionRationale(
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Explain to the user why we need to read the contacts
+        if (Build.VERSION.SDK_INT < 23) {
+            //Do not need to check the permission
+        } else {
+            if (checkAndRequestPermissions()) {
+                //If you have already permitted the permission
             }
-
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    10);
-
-            return;
         }
 
+
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        //  String val = settings.getString("speed", "WAAH");
-        kmh = settings.getBoolean("check_box", true);
+        kmh = settings.getBoolean("check_box", false);
         vibe = settings.getBoolean("vibrate", true);
         ring = settings.getBoolean("ring", true);
 
@@ -104,23 +110,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             speedLimit.setText(String.valueOf(kmhLimit));
             mphKmh.setText("km/h");
-            mphKmh2.setText("KM/h");
+            mphKmh2.setText("km/h");
         } else {
             speedLimit.setText(String.valueOf(mphLimit));
             mphKmh.setText("mph");
-            mphKmh2.setText("MPH");
+            mphKmh2.setText("mph");
         }
 
-        LocationManager locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        this.onLocationChanged(null);
+        if(permissionsOK) {
+            LocationManager locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            this.onLocationChanged(null);
+        }
     }
 
     @Override
     public void onLocationChanged(Location location) {
 
-        // String url = "http://www.overpass-api.de/api/xapi?*[bbox=-84.295939,30.444910,-84.295617,30.445215][maxspeed=*]";
-        //             "http://www.overpass-api.de/api/xapi?*[bbox=-84.300841,30.446713,-84.300541,30.447013][maxspeed=*]"
         if (location == null) {
             return;
         }
@@ -142,8 +148,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
 
         currenttime = System.currentTimeMillis();
-        if(currenttime-starttime2>30000)
+        if(currenttime-starttime2>5000)
         {
+            Date d=new Date();
+            SimpleDateFormat sdf=new SimpleDateFormat("hh:mm:ss a");
+            String currentDateTimeString = sdf.format(d);
+            lastUpdated.setText(currentDateTimeString);
 
         dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 
@@ -186,11 +196,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     kmhLimit = (int) Math.round(mphLimit * 1.60934);
                     speedLimit.setText(String.valueOf(kmhLimit));
                     mphKmh.setText("km/h");
-                    mphKmh2.setText("KM/h");
+                    mphKmh2.setText("km/h");
                 } else {
                     speedLimit.setText(String.valueOf(mphLimit));
                     mphKmh.setText("mph");
-                    mphKmh2.setText("MPH");
+                    mphKmh2.setText("mph");
                 }
 
             }
@@ -367,21 +377,69 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         vibe = prefs.getBoolean("vibrate", true);
         ring = prefs.getBoolean("ring", true);
-        kmh = prefs.getBoolean("check_box", true);
+        kmh = prefs.getBoolean("check_box", false);
+        alertSpeed = Integer.valueOf(prefs.getString("set_speed_preference", "5"));
+
+        if(alertSpeed > 20) {
+            prefs.
+        }
+
 
         if (kmh) {
             kmhLimit = (int) Math.round(mphLimit * 1.60934);
             speedLimit.setText(String.valueOf(kmhLimit));
             mphKmh.setText("km/h");
-            mphKmh2.setText("KM/h");
+            mphKmh2.setText("km/h");
         } else {
             speedLimit.setText(String.valueOf(mphLimit));
             mphKmh.setText("mph");
-            mphKmh2.setText("MPH");
+            mphKmh2.setText("mph");
         }
 
 
     }
 
+
+    private boolean checkAndRequestPermissions() {
+        int permissionLocation = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+
+        int storagePermission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE);
+
+
+
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        if (storagePermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+        if (permissionLocation != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this,
+                    listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), MY_PERMISSIONS_REQUEST_ACCOUNTS);
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_ACCOUNTS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    //Permission Granted Successfully.
+                    permissionsOK = true;
+                } else {
+                    //You did not accept the request can not use the functionality.
+                    permissionsOK = false;
+                }
+                break;
+        }
+    }
 
 }

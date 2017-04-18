@@ -2,7 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <CheckBoxPreference
-
         android:defaultValue="false"
         android:title="Kmh"
         android:key="check_box"
@@ -15,4 +14,12 @@
         android:defaultValue="true"
         android:title="Ring"
         android:key="ring" />
+    <EditTextPreference
+        android:defaultValue="5"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Set Speed Alert"
+        android:key="set_speed_preference"
+        android:inputType="number"
+        android:id="@+id/setSpeedPreference"/>
 </PreferenceScreen>

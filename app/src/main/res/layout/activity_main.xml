@@ -83,5 +83,26 @@
         android:layout_toStartOf="@+id/mphkmh2"
         android:layout_marginEnd="19dp" />
 
+    <TextView
+        android:text="Speed Limit Updated:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/lastUpdatedText"
+        android:textColorLink="?attr/colorControlHighlight"
+        android:textColor="?attr/colorButtonNormal"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/speedLimitSign"
+        android:textSize="12sp" />
+
+    <TextView
+        android:text=""
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/lastUpdatedTime"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/lastUpdatedText"
+        android:textSize="12sp" />
+
 
 </RelativeLayout>
