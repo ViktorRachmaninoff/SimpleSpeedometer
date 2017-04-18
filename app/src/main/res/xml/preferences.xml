@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <CheckBoxPreference
         android:defaultValue="false"
@@ -14,12 +15,11 @@
         android:defaultValue="true"
         android:title="Ring"
         android:key="ring" />
-    <EditTextPreference
-        android:defaultValue="5"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="Set Speed Alert"
-        android:key="set_speed_preference"
-        android:inputType="number"
-        android:id="@+id/setSpeedPreference"/>
+    <ListPreference
+        android:defaultValue="1"
+        android:title="Set Alert Speed"
+        android:entries="@array/speeds"
+        android:entryValues="@array/speeds"
+        android:key="set_speed_preference" />
+    />
 </PreferenceScreen>

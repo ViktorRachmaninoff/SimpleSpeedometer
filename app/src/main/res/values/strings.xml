@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">No Speeding</string>
 
+    <string-array name="speeds">
+        <item>1</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+
+    </string-array>
     <string name="title_activity_open">No Speeding</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>

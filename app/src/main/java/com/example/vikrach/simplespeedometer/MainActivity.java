@@ -79,7 +79,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+       /* if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
 
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        10);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }*/
         kmhLimit = (int) Math.round(mphLimit * 1.60934);
 
         speed = (TextView) findViewById(R.id.yourSpeed);
@@ -117,11 +141,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             mphKmh2.setText("mph");
         }
 
-        if(permissionsOK) {
+  //     if(permissionsOK) {
             LocationManager locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
             locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
             this.onLocationChanged(null);
-        }
+    //    }
     }
 
     @Override
@@ -186,9 +210,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
 
                 File f = new File(uri.getPath());
+                boolean deleted;
 
                 if(f.exists())
-                f.delete();
+                deleted = f.delete();
 
 
                 starttime2 = System.currentTimeMillis();
@@ -235,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 
             if(kmh) {
-                if (nCurrentSpeed > kmhLimit)
+                if (nCurrentSpeed > kmhLimit+alertSpeed)
                 {
                     currenttime = System.currentTimeMillis();
                     if(vibe)
@@ -257,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
             }
             else {
-                if (nCurrentSpeed > mphLimit)
+                if (nCurrentSpeed > mphLimit+alertSpeed)
                 {
                     currenttime = System.currentTimeMillis();
                     if(vibe)
@@ -378,11 +403,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         vibe = prefs.getBoolean("vibrate", true);
         ring = prefs.getBoolean("ring", true);
         kmh = prefs.getBoolean("check_box", false);
-        alertSpeed = Integer.valueOf(prefs.getString("set_speed_preference", "5"));
-
-        if(alertSpeed > 20) {
- //           prefs.
-        }
+        alertSpeed = Integer.valueOf(prefs.getString("set_speed_preference", "1"));
 
 
         if (kmh) {
