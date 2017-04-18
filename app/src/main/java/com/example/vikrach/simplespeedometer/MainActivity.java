@@ -381,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         alertSpeed = Integer.valueOf(prefs.getString("set_speed_preference", "5"));
 
         if(alertSpeed > 20) {
-            prefs.
+ //           prefs.
         }
 
 
